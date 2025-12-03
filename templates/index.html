@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h3 class="mb-4">Visão Geral</h3>
+
+<!-- Cards -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm"><div class="card-body"><h5>Consultas Hoje</h5><h3>{{ agendamentos|length }}</h3></div></div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm"><div class="card-body"><h5>Status</h5><h3>Online</h3></div></div>
+    </div>
+</div>
+
+<!-- Tabela -->
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white py-3">
+        <h5 class="mb-0">Próximos Agendamentos (Banco de Dados)</h5>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>Paciente</th>
+                    <th>Serviço</th>
+                    <th>Data/Hora</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for apt in agendamentos %}
+                <tr>
+                    <td>{{ apt.paciente_nome }}</td>
+                    <td>{{ apt.servico_tipo }}</td>
+                    <td>{{ apt.data_hora }}</td>
+                    <td><span class="badge bg-secondary">{{ apt.status }}</span></td>
+                </tr>
+                {% else %}
+                <tr><td colspan="4" class="text-center py-4 text-muted">Nenhum agendamento encontrado no banco de dados.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
