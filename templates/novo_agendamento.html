@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>📅 Novo Agendamento</h1>
+
+    <div class="row mt-4">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <form method="POST" novalidate>
+                        {{ csrf_token() }}
+
+                        <div class="mb-3">
+                            <label for="paciente_nome" class="form-label">Nome do Paciente</label>
+                            <input type="text" class="form-control" id="paciente_nome" name="paciente_nome"
+                                value="{{ current_user.nome }}" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="dentista_responsavel" class="form-label">Dentista Responsável</label>
+                            <input type="text" class="form-control" id="dentista_responsavel"
+                                name="dentista_responsavel" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="servico_tipo" class="form-label">Tipo de Serviço</label>
+                            <select class="form-control" id="servico_tipo" name="servico_tipo" required>
+                                <option value="">Selecione...</option>
+                                <option value="Consulta">Consulta</option>
+                                <option value="Limpeza">Limpeza</option>
+                                <option value="Restauração">Restauração</option>
+                                <option value="Extração">Extração</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="data_hora" class="form-label">Data e Hora</label>
+                            <input type="datetime-local" class="form-control" id="data_hora" name="data_hora" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="observacoes" class="form-label">Observações</label>
+                            <textarea class="form-control" id="observacoes" name="observacoes" rows="4"></textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-success">Agendar</button>
+                        <a href="{{ url_for('index') }}" class="btn btn-secondary">Cancelar</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

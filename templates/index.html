@@ -6,38 +6,95 @@
 <!-- Cards -->
 <div class="row mb-4">
     <div class="col-md-3">
-        <div class="card border-0 shadow-sm"><div class="card-body"><h5>Consultas Hoje</h5><h3>{{ agendamentos|length }}</h3></div></div>
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <h5 class="text-muted small">Total Agendamentos</h5>
+                <h3>{{ total_agendamentos }}</h3>
+            </div>
+        </div>
     </div>
     <div class="col-md-3">
-        <div class="card border-0 shadow-sm"><div class="card-body"><h5>Status</h5><h3>Online</h3></div></div>
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <h5 class="text-muted small">Pendentes</h5>
+                <h3 class="text-warning">{{ pendentes }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <h5 class="text-muted small">Confirmados</h5>
+                <h3 class="text-success">{{ confirmados }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <h5 class="text-muted small">Status Sistema</h5>
+                <h3 class="text-primary">Online</h3>
+            </div>
+        </div>
     </div>
 </div>
 
 <!-- Tabela -->
 <div class="card border-0 shadow-sm">
-    <div class="card-header bg-white py-3">
-        <h5 class="mb-0">Próximos Agendamentos (Banco de Dados)</h5>
+    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Próximos Agendamentos</h5>
+        <a href="{{ url_for('novo_agendamento') }}" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Novo</a>
     </div>
     <div class="table-responsive">
-        <table class="table table-hover mb-0">
+        <table class="table table-hover mb-0 align-middle">
             <thead>
                 <tr>
                     <th>Paciente</th>
+                    <th>Dentista</th>
                     <th>Serviço</th>
                     <th>Data/Hora</th>
                     <th>Status</th>
+                    <th>Ações</th>
                 </tr>
             </thead>
             <tbody>
                 {% for apt in agendamentos %}
                 <tr>
                     <td>{{ apt.paciente_nome }}</td>
+                    <td>{{ apt.dentista_responsavel }}</td>
                     <td>{{ apt.servico_tipo }}</td>
-                    <td>{{ apt.data_hora }}</td>
-                    <td><span class="badge bg-secondary">{{ apt.status }}</span></td>
+                    <td>{{ apt.data_hora.strftime('%d/%m/%Y %H:%M') }}</td>
+                    <td>
+                        {% if apt.status == 'pendente' %}
+                        <span class="badge bg-warning text-dark">Pendente</span>
+                        {% elif apt.status == 'confirmado' %}
+                        <span class="badge bg-success">Confirmado</span>
+                        {% elif apt.status == 'cancelado' %}
+                        <span class="badge bg-danger">Cancelado</span>
+                        {% else %}
+                        <span class="badge bg-secondary">{{ apt.status }}</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="btn-group">
+                            <a href="{{ url_for('editar_agendamento', id=apt.id) }}"
+                                class="btn btn-sm btn-outline-primary" title="Editar">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <form action="{{ url_for('deletar_agendamento', id=apt.id) }}" method="POST"
+                                class="d-inline" onsubmit="return confirm('Tem certeza que deseja excluir?');">
+                                {{ csrf_token() }}
+                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Excluir">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
                 </tr>
                 {% else %}
-                <tr><td colspan="4" class="text-center py-4 text-muted">Nenhum agendamento encontrado no banco de dados.</td></tr>
+                <tr>
+                    <td colspan="6" class="text-center py-4 text-muted">Nenhum agendamento encontrado.</td>
+                </tr>
                 {% endfor %}
             </tbody>
         </table>
