@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+
+{% block title %}Agenda - DentalSystem{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">Agenda</h1>
+            <p class="page-subtitle">Visualize e gerencie todos os agendamentos</p>
+        </div>
+        <div class="page-actions">
+            <a href="{{ url_for('admin_novo_agendamento') }}" class="btn btn-primary">
+                <i class="bi bi-plus-lg"></i>
+                Novo Agendamento
+            </a>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="GET" action="{{ url_for('admin_agenda') }}"
+                style="display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-end;">
+                <div class="form-group" style="margin-bottom: 0; flex: 1; min-width: 150px;">
+                    <label class="form-label">Data</label>
+                    <input type="date" name="data" class="form-control" value="{{ data_filtro }}">
+                </div>
+
+                <div class="form-group" style="margin-bottom: 0; flex: 1; min-width: 150px;">
+                    <label class="form-label">Dentista</label>
+                    <select name="dentista_id" class="form-control">
+                        <option value="">Todos</option>
+                        {% for dentista in dentistas %}
+                        <option value="{{ dentista.id }}" {% if dentista_filtro|string==dentista.id|string %}selected{%
+                            endif %}>
+                            {{ dentista.nome }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 0; flex: 1; min-width: 150px;">
+                    <label class="form-label">Status</label>
+                    <select name="status" class="form-control">
+                        <option value="">Todos</option>
+                        <option value="pendente" {% if status_filtro=='pendente' %}selected{% endif %}>Pendente</option>
+                        <option value="confirmado" {% if status_filtro=='confirmado' %}selected{% endif %}>Confirmado
+                        </option>
+                        <option value="cancelado" {% if status_filtro=='cancelado' %}selected{% endif %}>Cancelado
+                        </option>
+                        <option value="concluido" {% if status_filtro=='concluido' %}selected{% endif %}>Concluído
+                        </option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-funnel"></i>
+                    Filtrar
+                </button>
+
+                <a href="{{ url_for('admin_agenda') }}" class="btn btn-secondary">
+                    <i class="bi bi-x-lg"></i>
+                    Limpar
+                </a>
+            </form>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">
+                Agendamentos
+                {% if data_filtro %}
+                <span class="badge badge-primary" style="font-weight: 400; font-size: 12px; margin-left: 8px;">
+                    {{ data_filtro }}
+                </span>
+                {% endif %}
+            </h3>
+            <span class="badge badge-secondary">{{ agendamentos|length }} resultado(s)</span>
+        </div>
+
+        {% if agendamentos %}
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Horário</th>
+                        <th>Paciente</th>
+                        <th>Serviço</th>
+                        <th>Dentista</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for apt in agendamentos %}
+                    <tr>
+                        <td>
+                            <div style="font-weight: 500;">{{ apt.data_hora_inicio.strftime('%H:%M') }}</div>
+                            <div style="font-size: 12px; color: var(--color-gray-400);">{{
+                                apt.data_hora_inicio.strftime('%d/%m/%Y') }}</div>
+                        </td>
+                        <td>
+                            <div style="font-weight: 500;">{{ apt.paciente.nome }}</div>
+                            <div style="font-size: 12px; color: var(--color-gray-400);">{{ apt.paciente.telefone or
+                                apt.paciente.email }}</div>
+                        </td>
+                        <td>{{ apt.servico.nome }}</td>
+                        <td>{{ apt.dentista.nome }}</td>
+                        <td>
+                            <span class="badge badge-{{ apt.get_status_badge() }}">
+                                {{ apt.status|capitalize }}
+                            </span>
+                        </td>
+                        <td>
+                            <div style="display: flex; gap: 8px;">
+                                {% if apt.status in ['pendente', 'confirmado'] and apt.paciente.telefone %}
+                                {% set telefone_limpo = apt.paciente.telefone.replace('(', '').replace(')',
+                                '').replace(' ', '').replace('-', '') %}
+                                {% set primeiro_nome = apt.paciente.nome.split()[0] %}
+                                {% set mensagem = 'Olá ' + primeiro_nome + '! Este é um lembrete da sua consulta
+                                odontológica agendada para ' + apt.data_hora_inicio.strftime('%d/%m/%Y') + ' às ' +
+                                apt.data_hora_inicio.strftime('%H:%M') + '. Serviço: ' + apt.servico.nome + ' com ' +
+                                apt.dentista.nome + '. Aguardamos você!' %}
+                                <a href="https://wa.me/55{{ telefone_limpo }}?text={{ mensagem|urlencode }}"
+                                    target="_blank" class="btn btn-success btn-sm" title="Enviar lembrete via WhatsApp">
+                                    <i class="bi bi-whatsapp"></i>
+                                </a>
+                                {% endif %}
+
+                                {% if apt.status == 'pendente' %}
+                                <form method="POST" action="{{ url_for('atualizar_status_agendamento', id=apt.id) }}">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <input type="hidden" name="status" value="confirmado">
+                                    <button type="submit" class="btn btn-primary btn-sm" title="Confirmar">
+                                        <i class="bi bi-check-lg"></i>
+                                    </button>
+                                </form>
+                                <form method="POST" action="{{ url_for('atualizar_status_agendamento', id=apt.id) }}">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <input type="hidden" name="status" value="cancelado">
+                                    <button type="submit" class="btn btn-danger btn-sm" title="Rejeitar">
+                                        <i class="bi bi-x-lg"></i>
+                                    </button>
+                                </form>
+                                {% elif apt.status == 'confirmado' %}
+                                <form method="POST" action="{{ url_for('atualizar_status_agendamento', id=apt.id) }}">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <input type="hidden" name="status" value="concluido">
+                                    <button type="submit" class="btn btn-info btn-sm" title="Marcar como concluído">
+                                        <i class="bi bi-check-all"></i>
+                                    </button>
+                                </form>
+                                {% else %}
+                                <span class="text-muted">-</span>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="card-body">
+            <div class="empty-state">
+                <div class="empty-state-icon">
+                    <i class="bi bi-calendar-x"></i>
+                </div>
+                <div class="empty-state-title">Nenhum agendamento encontrado</div>
+                <div class="empty-state-text">
+                    Não há agendamentos para os filtros selecionados.
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

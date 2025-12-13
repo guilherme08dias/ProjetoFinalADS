@@ -1,0 +1,35 @@
+# Ignorar cache do Python
+*.pyc
+__pycache__/
+*.pyo
+*.pyd
+.Python
+
+# Ignorar banco de dados local
+*.db
+*.sqlite
+*.sqlite3
+
+# Ignorar logs
+logs/
+*.log
+
+# Ignorar arquivos do sistema
+.DS_Store
+Thumbs.db
+
+# Ignorar IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Ignorar node_modules (se usar)
+node_modules/
+
+# Ignorar arquivos de backup
+*.bak
+*.tmp
+
+# Ignorar migrations (opcional, depende da estratégia)
+# migrations/

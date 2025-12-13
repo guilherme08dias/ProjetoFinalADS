@@ -1,0 +1,315 @@
+{% extends "base.html" %}
+{# ============================================
+Formulário de Agendamento Admin - DentalSystem
+Projeto Integrador - Equipe de Desenvolvimento
+============================================ #}
+
+{% block title %}Novo Agendamento - DentalSystem{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <!-- Cabeçalho da Página -->
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">Novo Agendamento</h1>
+            <p class="page-subtitle">Agende uma consulta para um paciente</p>
+        </div>
+        <div class="page-actions">
+            <a href="{{ url_for('admin_agenda') }}" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i>
+                Voltar
+            </a>
+        </div>
+    </div>
+
+    <div class="cards-grid">
+        <!-- Formulário de Agendamento -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="bi bi-calendar-plus" style="color: var(--color-primary);"></i>
+                    Dados do Agendamento
+                </h3>
+            </div>
+            <div class="card-body">
+                <form method="POST" id="agendamentoForm">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                    <!-- Seleção de Paciente -->
+                    <div class="form-group">
+                        <label class="form-label" for="paciente_id">Paciente *</label>
+                        <select id="paciente_id" name="paciente_id" class="form-control" required>
+                            <option value="">Selecione o paciente</option>
+                            {% for paciente in pacientes %}
+                            <option value="{{ paciente.id }}">
+                                {{ paciente.nome }} - {{ paciente.email }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Seleção de Serviço -->
+                    <div class="form-group">
+                        <label class="form-label" for="servico_id">Tipo de Serviço *</label>
+                        <select id="servico_id" name="servico_id" class="form-control" required>
+                            <option value="">Selecione o serviço</option>
+                            {% for servico in servicos %}
+                            <option value="{{ servico.id }}" data-duracao="{{ servico.duracao_minutos }}"
+                                data-preco="{{ servico.preco }}">
+                                {{ servico.nome }} - R$ {{ "%.2f"|format(servico.preco) }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                        <div class="form-hint" id="servicoInfo"></div>
+                    </div>
+
+                    <!-- Seleção de Dentista -->
+                    <div class="form-group">
+                        <label class="form-label" for="dentista_id">Dentista *</label>
+                        <select id="dentista_id" name="dentista_id" class="form-control" required>
+                            <option value="">Selecione o dentista</option>
+                            {% for dentista in dentistas %}
+                            <option value="{{ dentista.id }}">
+                                {{ dentista.nome }} - {{ dentista.especialidade or 'Clínico Geral' }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Seleção de Data -->
+                    <div class="form-group">
+                        <label class="form-label" for="data">Data *</label>
+                        <input type="date" id="data" name="data" class="form-control"
+                            min="{{ now.strftime('%Y-%m-%d') if now else '' }}" required>
+                    </div>
+
+                    <!-- Seleção de Horário -->
+                    <div class="form-group">
+                        <label class="form-label">Horário Disponível *</label>
+                        <div id="horariosContainer">
+                            <p class="text-muted" style="font-size: 14px;">
+                                <i class="bi bi-info-circle"></i>
+                                Selecione o serviço, dentista e data para ver os horários disponíveis.
+                            </p>
+                        </div>
+                        <input type="hidden" id="hora" name="hora" required>
+                    </div>
+
+                    <!-- Observações -->
+                    <div class="form-group">
+                        <label class="form-label" for="observacoes">Observações</label>
+                        <textarea id="observacoes" name="observacoes" class="form-control" rows="3"
+                            placeholder="Alguma informação adicional? (opcional)"></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-lg w-100" id="btnAgendar" disabled>
+                        <i class="bi bi-check-lg"></i>
+                        Confirmar Agendamento
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Resumo do Agendamento -->
+        <div class="card" id="resumoCard" style="display: none;">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="bi bi-receipt" style="color: var(--color-success);"></i>
+                    Resumo
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="mb-3" style="padding-bottom: 16px; border-bottom: 1px solid var(--border-color);">
+                    <div class="text-muted" style="font-size: 12px; margin-bottom: 4px;">PACIENTE</div>
+                    <div style="font-weight: 500;" id="resumoPaciente">-</div>
+                </div>
+                <div class="mb-3" style="padding-bottom: 16px; border-bottom: 1px solid var(--border-color);">
+                    <div class="text-muted" style="font-size: 12px; margin-bottom: 4px;">SERVIÇO</div>
+                    <div style="font-weight: 500;" id="resumoServico">-</div>
+                </div>
+                <div class="mb-3" style="padding-bottom: 16px; border-bottom: 1px solid var(--border-color);">
+                    <div class="text-muted" style="font-size: 12px; margin-bottom: 4px;">DENTISTA</div>
+                    <div style="font-weight: 500;" id="resumoDentista">-</div>
+                </div>
+                <div class="mb-3" style="padding-bottom: 16px; border-bottom: 1px solid var(--border-color);">
+                    <div class="text-muted" style="font-size: 12px; margin-bottom: 4px;">DATA E HORA</div>
+                    <div style="font-weight: 500;" id="resumoDataHora">-</div>
+                </div>
+                <div class="mb-3" style="padding-bottom: 16px; border-bottom: 1px solid var(--border-color);">
+                    <div class="text-muted" style="font-size: 12px; margin-bottom: 4px;">DURAÇÃO</div>
+                    <div style="font-weight: 500;" id="resumoDuracao">-</div>
+                </div>
+                <div>
+                    <div class="text-muted" style="font-size: 12px; margin-bottom: 4px;">VALOR</div>
+                    <div style="font-weight: 600; font-size: 24px; color: var(--color-primary);" id="resumoValor">R$
+                        0,00</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Elementos do formulário
+    const pacienteSelect = document.getElementById('paciente_id');
+    const servicoSelect = document.getElementById('servico_id');
+    const dentistaSelect = document.getElementById('dentista_id');
+    const dataInput = document.getElementById('data');
+    const horariosContainer = document.getElementById('horariosContainer');
+    const horaInput = document.getElementById('hora');
+    const btnAgendar = document.getElementById('btnAgendar');
+    const resumoCard = document.getElementById('resumoCard');
+
+    // Define data mínima como hoje
+    const hoje = new Date().toISOString().split('T')[0];
+    dataInput.min = hoje;
+
+    // Evento quando paciente é selecionado
+    pacienteSelect.addEventListener('change', function () {
+        const option = this.options[this.selectedIndex];
+        if (option.value) {
+            document.getElementById('resumoPaciente').textContent = option.text.split(' - ')[0];
+            resumoCard.style.display = 'block';
+        }
+    });
+
+    // Evento quando serviço é selecionado
+    servicoSelect.addEventListener('change', function () {
+        const option = this.options[this.selectedIndex];
+        if (option.value) {
+            const duracao = option.dataset.duracao;
+            const preco = parseFloat(option.dataset.preco).toFixed(2).replace('.', ',');
+            document.getElementById('servicoInfo').innerHTML =
+                `<i class="bi bi-clock"></i> Duração: ${duracao} min | <i class="bi bi-currency-dollar"></i> Valor: R$ ${preco}`;
+
+            // Atualiza resumo
+            document.getElementById('resumoServico').textContent = option.text.split(' - ')[0];
+            document.getElementById('resumoDuracao').textContent = `${duracao} minutos`;
+            document.getElementById('resumoValor').textContent = `R$ ${preco}`;
+        } else {
+            document.getElementById('servicoInfo').innerHTML = '';
+        }
+        buscarHorarios();
+    });
+
+    // Evento quando dentista é selecionado
+    dentistaSelect.addEventListener('change', function () {
+        const option = this.options[this.selectedIndex];
+        if (option.value) {
+            document.getElementById('resumoDentista').textContent = option.text;
+        }
+        buscarHorarios();
+    });
+
+    // Evento quando data é selecionada
+    dataInput.addEventListener('change', function () {
+        if (this.value) {
+            const [ano, mes, dia] = this.value.split('-');
+            document.getElementById('resumoDataHora').textContent = `${dia}/${mes}/${ano}`;
+        }
+        buscarHorarios();
+    });
+
+    // Função para buscar horários disponíveis
+    function buscarHorarios() {
+        const servico = servicoSelect.value;
+        const dentista = dentistaSelect.value;
+        const data = dataInput.value;
+
+        // Limpa seleção anterior
+        horaInput.value = '';
+        btnAgendar.disabled = true;
+
+        if (!servico || !dentista || !data) {
+            horariosContainer.innerHTML = `
+                <p class="text-muted" style="font-size: 14px;">
+                    <i class="bi bi-info-circle"></i>
+                    Selecione o serviço, dentista e data para ver os horários disponíveis.
+                </p>
+            `;
+            return;
+        }
+
+        horariosContainer.innerHTML = `
+            <p class="text-muted" style="font-size: 14px;">
+                <i class="bi bi-hourglass-split pulse"></i>
+                Buscando horários disponíveis...
+            </p>
+        `;
+
+        // Requisição para buscar horários
+        fetch(`/api/horarios-disponiveis?servico_id=${servico}&dentista_id=${dentista}&data=${data}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    horariosContainer.innerHTML = `
+                        <div class="alert alert-danger">
+                            <i class="bi bi-exclamation-circle"></i> ${data.error}
+                        </div>
+                    `;
+                    return;
+                }
+
+                if (data.horarios.length === 0) {
+                    horariosContainer.innerHTML = `
+                        <div class="alert alert-warning">
+                            <i class="bi bi-calendar-x"></i>
+                            Não há horários disponíveis para esta data. Por favor, selecione outra data.
+                        </div>
+                    `;
+                    return;
+                }
+
+                // Renderiza os horários
+                let html = '<div style="display: flex; flex-wrap: wrap; gap: 8px;">';
+                data.horarios.forEach(horario => {
+                    html += `
+                        <button type="button" 
+                                class="btn btn-outline horario-btn" 
+                                data-hora="${horario}"
+                                style="min-width: 80px;">
+                            ${horario}
+                        </button>
+                    `;
+                });
+                html += '</div>';
+
+                horariosContainer.innerHTML = html;
+
+                // Adiciona evento aos botões
+                document.querySelectorAll('.horario-btn').forEach(btn => {
+                    btn.addEventListener('click', function () {
+                        // Remove seleção anterior
+                        document.querySelectorAll('.horario-btn').forEach(b => {
+                            b.classList.remove('btn-primary');
+                            b.classList.add('btn-outline');
+                        });
+
+                        // Seleciona este horário
+                        this.classList.remove('btn-outline');
+                        this.classList.add('btn-primary');
+
+                        horaInput.value = this.dataset.hora;
+                        btnAgendar.disabled = false;
+
+                        // Atualiza resumo
+                        const [ano, mes, dia] = dataInput.value.split('-');
+                        document.getElementById('resumoDataHora').textContent =
+                            `${dia}/${mes}/${ano} às ${this.dataset.hora}`;
+                    });
+                });
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                horariosContainer.innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="bi bi-exclamation-circle"></i>
+                        Erro ao buscar horários. Tente novamente.
+                    </div>
+                `;
+            });
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{# ============================================
+Formulário de Serviço - DentalSystem
+Projeto Integrador - Equipe de Desenvolvimento
+============================================ #}
+
+{% block title %}{{ 'Editar' if servico else 'Novo' }} Serviço - DentalSystem{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <!-- Cabeçalho da Página -->
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">{{ 'Editar' if servico else 'Novo' }} Serviço</h1>
+            <p class="page-subtitle">{{ 'Altere os dados do serviço' if servico else 'Cadastre um novo serviço' }}</p>
+        </div>
+        <div class="page-actions">
+            <a href="{{ url_for('admin_servicos') }}" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i>
+                Voltar
+            </a>
+        </div>
+    </div>
+
+    <!-- Formulário -->
+    <div class="card" style="max-width: 600px;">
+        <div class="card-header">
+            <h3 class="card-title">
+                <i class="bi bi-clipboard2-pulse" style="color: var(--color-primary);"></i>
+                Dados do Serviço
+            </h3>
+        </div>
+        <div class="card-body">
+            <form method="POST">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                <div class="form-group">
+                    <label class="form-label" for="nome">Nome do Serviço *</label>
+                    <input type="text" id="nome" name="nome" class="form-control"
+                        placeholder="Ex: Limpeza, Clareamento, etc." value="{{ servico.nome if servico else '' }}"
+                        required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="descricao">Descrição</label>
+                    <textarea id="descricao" name="descricao" class="form-control" rows="3"
+                        placeholder="Descreva o serviço (opcional)">{{ servico.descricao if servico else '' }}</textarea>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                    <div class="form-group">
+                        <label class="form-label" for="duracao_minutos">Duração (minutos) *</label>
+                        <input type="number" id="duracao_minutos" name="duracao_minutos" class="form-control" min="15"
+                            step="15" value="{{ servico.duracao_minutos if servico else '30' }}" required>
+                        <div class="form-hint">Tempo estimado do procedimento</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="preco">Preço (R$) *</label>
+                        <input type="text" id="preco" name="preco" class="form-control" placeholder="0,00"
+                            value="{{ '%.2f'|format(servico.preco)|replace('.', ',') if servico else '' }}" required>
+                    </div>
+                </div>
+
+                {% if servico %}
+                <div class="form-group">
+                    <label class="form-check">
+                        <input type="checkbox" name="ativo" class="form-check-input" {{ 'checked' if servico.ativo
+                            else '' }}>
+                        <span class="form-check-label">Serviço ativo</span>
+                    </label>
+                    <div class="form-hint">Serviços inativos não aparecem para agendamento</div>
+                </div>
+                {% endif %}
+
+                <button type="submit" class="btn btn-primary btn-lg w-100">
+                    <i class="bi bi-check-lg"></i>
+                    {{ 'Salvar Alterações' if servico else 'Cadastrar Serviço' }}
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

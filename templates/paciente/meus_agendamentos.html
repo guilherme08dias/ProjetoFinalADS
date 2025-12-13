@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{# ============================================
+Lista de Agendamentos do Paciente - DentalSystem
+Projeto Integrador - Equipe de Desenvolvimento
+============================================ #}
+
+{% block title %}Meus Agendamentos - DentalSystem{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <!-- Cabeçalho da Página -->
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">Meus Agendamentos</h1>
+            <p class="page-subtitle">Visualize e gerencie suas consultas</p>
+        </div>
+        <div class="page-actions">
+            <a href="{{ url_for('agendar') }}" class="btn btn-primary">
+                <i class="bi bi-plus-lg"></i>
+                Novo Agendamento
+            </a>
+        </div>
+    </div>
+
+    <!-- Lista de Agendamentos -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Histórico de Consultas</h3>
+        </div>
+
+        {% if agendamentos %}
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Data/Hora</th>
+                        <th>Serviço</th>
+                        <th>Dentista</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for apt in agendamentos %}
+                    <tr>
+                        <td>
+                            <div style="font-weight: 500;">{{ apt.data_hora_inicio.strftime('%d/%m/%Y') }}</div>
+                            <div style="font-size: 13px; color: var(--color-gray-500);">{{
+                                apt.data_hora_inicio.strftime('%H:%M') }} - {{ apt.data_hora_fim.strftime('%H:%M') }}
+                            </div>
+                        </td>
+                        <td>
+                            <div style="font-weight: 500;">{{ apt.servico.nome }}</div>
+                            <div style="font-size: 13px; color: var(--color-gray-500);">{{ apt.servico.duracao_minutos
+                                }} min</div>
+                        </td>
+                        <td>
+                            <div style="font-weight: 500;">{{ apt.dentista.nome }}</div>
+                            <div style="font-size: 13px; color: var(--color-gray-500);">{{ apt.dentista.especialidade or
+                                'Clínico Geral' }}</div>
+                        </td>
+                        <td>
+                            <span class="badge badge-{{ apt.get_status_badge() }}">
+                                {{ apt.status|capitalize }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if apt.status in ['pendente', 'confirmado'] %}
+                            <form method="POST" action="{{ url_for('cancelar_agendamento', id=apt.id) }}"
+                                style="display: inline;">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button type="submit" class="btn btn-outline btn-sm"
+                                    onclick="return confirm('Tem certeza que deseja cancelar esta consulta?')">
+                                    <i class="bi bi-x-circle"></i>
+                                    Cancelar
+                                </button>
+                            </form>
+                            {% else %}
+                            <span class="text-muted" style="font-size: 13px;">-</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="card-body">
+            <div class="empty-state">
+                <div class="empty-state-icon">
+                    <i class="bi bi-calendar-x"></i>
+                </div>
+                <div class="empty-state-title">Nenhum agendamento encontrado</div>
+                <div class="empty-state-text">
+                    Você ainda não realizou nenhum agendamento.
+                </div>
+                <a href="{{ url_for('agendar') }}" class="btn btn-primary">
+                    <i class="bi bi-plus-lg"></i>
+                    Agendar Consulta
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

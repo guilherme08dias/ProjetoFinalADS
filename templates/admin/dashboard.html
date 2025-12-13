@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+{# ============================================
+Dashboard do Administrador - DentalSystem
+Projeto Integrador - Equipe de Desenvolvimento
+============================================ #}
+
+{% block title %}Painel Admin - DentalSystem{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <!-- Cabeçalho da Página -->
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">Dashboard</h1>
+            <p class="page-subtitle">Visão geral do consultório</p>
+        </div>
+        <div class="page-actions">
+            <a href="{{ url_for('admin_agenda') }}" class="btn btn-primary">
+                <i class="bi bi-calendar3"></i>
+                Ver Agenda
+            </a>
+        </div>
+    </div>
+
+    <!-- Filtro de Data -->
+    <div class="card" style="margin-bottom: 20px; padding: 15px;">
+        <form method="GET" action="{{ url_for('admin_dashboard') }}"
+            style="display: flex; gap: 15px; align-items: flex-end;">
+            <div class="form-group" style="margin-bottom: 0;">
+                <label for="data_inicio" style="font-size: 0.9rem; margin-bottom: 5px; display: block;">Data
+                    Início</label>
+                <input type="date" id="data_inicio" name="data_inicio" class="form-control" value="{{ data_inicio }}"
+                    required>
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+                <label for="data_fim" style="font-size: 0.9rem; margin-bottom: 5px; display: block;">Data Fim</label>
+                <input type="date" id="data_fim" name="data_fim" class="form-control" value="{{ data_fim }}" required>
+            </div>
+            <button type="submit" class="btn btn-primary" style="height: 42px;">
+                <i class="bi bi-filter"></i> Filtrar
+            </button>
+        </form>
+    </div>
+
+    <!-- Cards de Estatísticas -->
+    <div class="stats-grid">
+        <div class="card">
+            <div class="stat-card">
+                <div class="stat-icon primary">
+                    <i class="bi bi-cash-coin"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-value">R$ {{ "%.2f"|format(receita_total)|replace('.', ',') }}</div>
+                    <div class="stat-label">Receita (Período)</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="stat-card">
+                <div class="stat-icon info">
+                    <i class="bi bi-calendar-range"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-value">{{ total_agendamentos_periodo }}</div>
+                    <div class="stat-label">Agendamentos (Período)</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="stat-card">
+                <div class="stat-icon success">
+                    <i class="bi bi-people"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-value">{{ total_pacientes }}</div>
+                    <div class="stat-label">Total Pacientes</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="stat-card">
+                <div class="stat-icon warning">
+                    <i class="bi bi-clock-history"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-value">{{ pendentes }}</div>
+                    <div class="stat-label">Pendentes (Geral)</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Agendamentos de Hoje -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">
+                <i class="bi bi-calendar-day" style="color: var(--color-primary);"></i>
+                Consultas de Hoje
+            </h3>
+            <a href="{{ url_for('admin_agenda') }}" class="btn btn-secondary btn-sm">
+                Ver agenda completa
+            </a>
+        </div>
+        <div class="card-body" style="padding: 0;">
+            {% if agendamentos_hoje %}
+            {% for apt in agendamentos_hoje %}
+            <div class="appointment-item">
+                <div class="appointment-time">
+                    <div class="appointment-time-value">{{ apt.data_hora_inicio.strftime('%H:%M') }}</div>
+                    <div class="appointment-time-date">{{ apt.data_hora_fim.strftime('%H:%M') }}</div>
+                </div>
+                <div class="appointment-info">
+                    <div class="appointment-patient">{{ apt.paciente.nome }}</div>
+                    <div class="appointment-service">
+                        {{ apt.servico.nome }} | {{ apt.dentista.nome }}
+                    </div>
+                </div>
+                <span class="badge badge-{{ apt.get_status_badge() }}">
+                    {{ apt.status|capitalize }}
+                </span>
+                <div class="appointment-actions">
+                    {% if apt.status == 'pendente' %}
+                    <form method="POST" action="{{ url_for('atualizar_status_agendamento', id=apt.id) }}"
+                        style="display: inline;">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <input type="hidden" name="status" value="confirmado">
+                        <button type="submit" class="btn btn-success btn-sm" title="Confirmar">
+                            <i class="bi bi-check-lg"></i>
+                        </button>
+                    </form>
+                    <form method="POST" action="{{ url_for('atualizar_status_agendamento', id=apt.id) }}"
+                        style="display: inline;">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <input type="hidden" name="status" value="cancelado">
+                        <button type="submit" class="btn btn-danger btn-sm" title="Rejeitar">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon">
+                    <i class="bi bi-calendar-check"></i>
+                </div>
+                <div class="empty-state-title">Nenhuma consulta hoje</div>
+                <div class="empty-state-text">
+                    Não há consultas agendadas para hoje.
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

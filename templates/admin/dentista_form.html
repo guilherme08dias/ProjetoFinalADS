@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{# ============================================
+Formulário de Dentista - DentalSystem
+Projeto Integrador - Equipe de Desenvolvimento
+============================================ #}
+
+{% block title %}{{ 'Editar' if dentista else 'Novo' }} Dentista - DentalSystem{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <!-- Cabeçalho da Página -->
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">{{ 'Editar' if dentista else 'Novo' }} Dentista</h1>
+            <p class="page-subtitle">{{ 'Altere os dados do dentista' if dentista else 'Cadastre um novo dentista' }}
+            </p>
+        </div>
+        <div class="page-actions">
+            <a href="{{ url_for('admin_dentistas') }}" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i>
+                Voltar
+            </a>
+        </div>
+    </div>
+
+    <!-- Formulário -->
+    <div class="card" style="max-width: 600px;">
+        <div class="card-header">
+            <h3 class="card-title">
+                <i class="bi bi-person-badge" style="color: var(--color-primary);"></i>
+                Dados do Dentista
+            </h3>
+        </div>
+        <div class="card-body">
+            <form method="POST">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                <div class="form-group">
+                    <label class="form-label" for="nome">Nome Completo *</label>
+                    <input type="text" id="nome" name="nome" class="form-control" placeholder="Ex: Dr. João Silva"
+                        value="{{ dentista.nome if dentista else '' }}" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="cro">CRO *</label>
+                    <input type="text" id="cro" name="cro" class="form-control" placeholder="Ex: 12345-SP"
+                        value="{{ dentista.cro if dentista else '' }}" {{ 'readonly' if dentista else '' }} required>
+                    {% if dentista %}
+                    <div class="form-hint">O CRO não pode ser alterado</div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="especialidade">Especialidade</label>
+                    <input type="text" id="especialidade" name="especialidade" class="form-control"
+                        placeholder="Ex: Ortodontia, Endodontia, etc."
+                        value="{{ dentista.especialidade if dentista else '' }}">
+                    <div class="form-hint">Deixe em branco para "Clínico Geral"</div>
+                </div>
+
+                {% if dentista %}
+                <div class="form-group">
+                    <label class="form-check">
+                        <input type="checkbox" name="ativo" class="form-check-input" {{ 'checked' if dentista.ativo
+                            else '' }}>
+                        <span class="form-check-label">Dentista ativo</span>
+                    </label>
+                    <div class="form-hint">Dentistas inativos não aparecem para agendamento</div>
+                </div>
+                {% endif %}
+
+                <button type="submit" class="btn btn-primary btn-lg w-100">
+                    <i class="bi bi-check-lg"></i>
+                    {{ 'Salvar Alterações' if dentista else 'Cadastrar Dentista' }}
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

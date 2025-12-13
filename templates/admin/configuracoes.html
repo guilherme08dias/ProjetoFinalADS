@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+
+{% block title %}Configurações - DentalSystem{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">Configurações</h1>
+            <p class="page-subtitle">Gerencie as informações e horários da clínica</p>
+        </div>
+    </div>
+
+    <form method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <div class="cards-grid" style="grid-template-columns: 1fr 1fr;">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="bi bi-building" style="color: var(--color-primary);"></i>
+                        Dados da Clínica
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label class="form-label" for="nome_clinica">Nome da Clínica *</label>
+                        <input type="text" id="nome_clinica" name="nome_clinica" class="form-control"
+                            value="{{ config.nome_clinica }}" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="telefone_clinica">Telefone</label>
+                        <input type="tel" id="telefone_clinica" name="telefone_clinica" class="form-control"
+                            placeholder="(00) 00000-0000" value="{{ config.telefone_clinica or '' }}">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="endereco_clinica">Endereço</label>
+                        <textarea id="endereco_clinica" name="endereco_clinica" class="form-control" rows="3"
+                            placeholder="Rua, numero, bairro, cidade">{{ config.endereco_clinica or '' }}</textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="bi bi-clock" style="color: var(--color-success);"></i>
+                        Horário de Funcionamento
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label class="form-label">Primeiro Turno</label>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                            <div>
+                                <label class="form-label" for="hora_inicio_manha"
+                                    style="font-size: 12px; color: var(--color-gray-400);">Início</label>
+                                <input type="time" id="hora_inicio_manha" name="hora_inicio_manha" class="form-control"
+                                    value="{{ config.hora_inicio_manha }}" required>
+                            </div>
+                            <div>
+                                <label class="form-label" for="hora_fim_manha"
+                                    style="font-size: 12px; color: var(--color-gray-400);">Fim</label>
+                                <input type="time" id="hora_fim_manha" name="hora_fim_manha" class="form-control"
+                                    value="{{ config.hora_fim_manha }}" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Segundo Turno</label>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                            <div>
+                                <label class="form-label" for="hora_inicio_tarde"
+                                    style="font-size: 12px; color: var(--color-gray-400);">Início</label>
+                                <input type="time" id="hora_inicio_tarde" name="hora_inicio_tarde" class="form-control"
+                                    value="{{ config.hora_inicio_tarde }}" required>
+                            </div>
+                            <div>
+                                <label class="form-label" for="hora_fim_tarde"
+                                    style="font-size: 12px; color: var(--color-gray-400);">Fim</label>
+                                <input type="time" id="hora_fim_tarde" name="hora_fim_tarde" class="form-control"
+                                    value="{{ config.hora_fim_tarde }}" required>
+                            </div>
+                        </div>
+                        <div class="form-hint">Intervalo entre os turnos</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="intervalo_consultas">Intervalo entre Consultas (minutos)</label>
+                        <select id="intervalo_consultas" name="intervalo_consultas" class="form-control">
+                            <option value="15" {% if config.intervalo_consultas==15 %}selected{% endif %}>15 minutos
+                            </option>
+                            <option value="30" {% if config.intervalo_consultas==30 %}selected{% endif %}>30 minutos
+                            </option>
+                            <option value="60" {% if config.intervalo_consultas==60 %}selected{% endif %}>60 minutos
+                            </option>
+                        </select>
+                        <div class="form-hint">Define os intervalos de horários disponíveis para agendamento</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Dias de Funcionamento</label>
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <label class="form-check">
+                                <input type="checkbox" name="segunda" class="form-check-input" {% if config.segunda
+                                    %}checked{% endif %}>
+                                <span class="form-check-label">Segunda-feira</span>
+                            </label>
+                            <label class="form-check">
+                                <input type="checkbox" name="terca" class="form-check-input" {% if config.terca
+                                    %}checked{% endif %}>
+                                <span class="form-check-label">Terça-feira</span>
+                            </label>
+                            <label class="form-check">
+                                <input type="checkbox" name="quarta" class="form-check-input" {% if config.quarta
+                                    %}checked{% endif %}>
+                                <span class="form-check-label">Quarta-feira</span>
+                            </label>
+                            <label class="form-check">
+                                <input type="checkbox" name="quinta" class="form-check-input" {% if config.quinta
+                                    %}checked{% endif %}>
+                                <span class="form-check-label">Quinta-feira</span>
+                            </label>
+                            <label class="form-check">
+                                <input type="checkbox" name="sexta" class="form-check-input" {% if config.sexta
+                                    %}checked{% endif %}>
+                                <span class="form-check-label">Sexta-feira</span>
+                            </label>
+                            <label class="form-check">
+                                <input type="checkbox" name="sabado" class="form-check-input" {% if config.sabado
+                                    %}checked{% endif %}>
+                                <span class="form-check-label">Sábado</span>
+                            </label>
+                            <label class="form-check">
+                                <input type="checkbox" name="domingo" class="form-check-input" {% if config.domingo
+                                    %}checked{% endif %}>
+                                <span class="form-check-label">Domingo</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <div class="card-body" style="text-align: center;">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="bi bi-check-lg"></i>
+                    Salvar Configurações
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+    document.getElementById('telefone_clinica').addEventListener('input', function (e) {
+        let value = e.target.value.replace(/\D/g, '');
+        if (value.length > 11) value = value.slice(0, 11);
+
+        if (value.length > 6) {
+            value = '(' + value.slice(0, 2) + ') ' + value.slice(2, 7) + '-' + value.slice(7);
+        } else if (value.length > 2) {
+            value = '(' + value.slice(0, 2) + ') ' + value.slice(2);
+        } else if (value.length > 0) {
+            value = '(' + value;
+        }
+
+        e.target.value = value;
+    });
+</script>
+{% endblock %}

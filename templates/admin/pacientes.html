@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{# ============================================
+CRUD Pacientes - DentalSystem
+Projeto Integrador - Equipe de Desenvolvimento
+============================================ #}
+
+{% block title %}Pacientes - DentalSystem{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <!-- Cabeçalho da Página -->
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">Pacientes</h1>
+            <p class="page-subtitle">Visualize os pacientes cadastrados no sistema</p>
+        </div>
+        <div class="page-actions">
+            <a href="{{ url_for('novo_paciente') }}" class="btn btn-primary">
+                <i class="bi bi-plus-lg"></i>
+                Novo Paciente
+            </a>
+        </div>
+    </div>
+
+    <!-- Lista de Pacientes -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Lista de Pacientes</h3>
+            <span class="badge badge-secondary">{{ pacientes|length }} paciente(s)</span>
+        </div>
+
+        {% if pacientes %}
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>E-mail</th>
+                        <th>Telefone</th>
+                        <th>CPF</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for paciente in pacientes %}
+                    <tr>
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <div class="sidebar-user-avatar" style="width: 36px; height: 36px; font-size: 14px;">
+                                    {{ paciente.nome[0]|upper }}
+                                </div>
+                                <div>
+                                    <span style="font-weight: 500;">{{ paciente.nome }}</span>
+                                    <div style="font-size: 12px; color: var(--color-gray-400);">
+                                        Cadastro: {{ paciente.created_at.strftime('%d/%m/%Y') }}
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>{{ paciente.email }}</td>
+                        <td>{{ paciente.telefone or '-' }}</td>
+                        <td>{{ paciente.cpf or '-' }}</td>
+                        <td>
+                            {% if paciente.ativo %}
+                            <span class="badge badge-success">Ativo</span>
+                            {% else %}
+                            <span class="badge badge-secondary">Inativo</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div style="display: flex; gap: 8px;">
+                                <a href="{{ url_for('ver_paciente', id=paciente.id) }}" class="btn btn-secondary btn-sm"
+                                    title="Ver detalhes">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <a href="{{ url_for('editar_paciente', id=paciente.id) }}"
+                                    class="btn btn-secondary btn-sm" title="Editar">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <form method="POST" action="{{ url_for('toggle_paciente_status', id=paciente.id) }}">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <button type="submit"
+                                        class="btn {{ 'btn-danger' if paciente.ativo else 'btn-success' }} btn-sm"
+                                        title="{{ 'Desativar' if paciente.ativo else 'Ativar' }}">
+                                        <i
+                                            class="bi {{ 'bi-person-dash' if paciente.ativo else 'bi-person-check' }}"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="card-body">
+            <div class="empty-state">
+                <div class="empty-state-icon">
+                    <i class="bi bi-people"></i>
+                </div>
+                <div class="empty-state-title">Nenhum paciente cadastrado</div>
+                <div class="empty-state-text">
+                    Cadastre pacientes pela clínica para entregar as credenciais prontas.
+                </div>
+                <a href="{{ url_for('novo_paciente') }}" class="btn btn-primary">
+                    <i class="bi bi-plus-lg"></i>
+                    Cadastrar Primeiro Paciente
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{# ============================================
+CRUD Dentistas - DentalSystem
+Projeto Integrador - Equipe de Desenvolvimento
+============================================ #}
+
+{% block title %}Dentistas - DentalSystem{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <!-- Cabeçalho da Página -->
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">Dentistas</h1>
+            <p class="page-subtitle">Gerencie a equipe de dentistas do consultório</p>
+        </div>
+        <div class="page-actions">
+            <a href="{{ url_for('novo_dentista') }}" class="btn btn-primary">
+                <i class="bi bi-plus-lg"></i>
+                Novo Dentista
+            </a>
+        </div>
+    </div>
+
+    <!-- Lista de Dentistas -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Lista de Dentistas</h3>
+            <span class="badge badge-secondary">{{ dentistas|length }} dentista(s)</span>
+        </div>
+
+        {% if dentistas %}
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>CRO</th>
+                        <th>Especialidade</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for dentista in dentistas %}
+                    <tr>
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <div class="sidebar-user-avatar" style="width: 36px; height: 36px; font-size: 14px;">
+                                    {{ dentista.nome[0]|upper }}
+                                </div>
+                                <span style="font-weight: 500;">{{ dentista.nome }}</span>
+                            </div>
+                        </td>
+                        <td style="font-family: monospace;">{{ dentista.cro }}</td>
+                        <td>{{ dentista.especialidade or 'Clínico Geral' }}</td>
+                        <td>
+                            {% if dentista.ativo %}
+                            <span class="badge badge-success">Ativo</span>
+                            {% else %}
+                            <span class="badge badge-secondary">Inativo</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div style="display: flex; gap: 8px;">
+                                <a href="{{ url_for('editar_dentista', id=dentista.id) }}"
+                                    class="btn btn-secondary btn-sm" title="Editar">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <form method="POST" action="{{ url_for('excluir_dentista', id=dentista.id) }}"
+                                    onsubmit="return confirm('Tem certeza que deseja excluir este dentista?')">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <button type="submit" class="btn btn-danger btn-sm" title="Excluir">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="card-body">
+            <div class="empty-state">
+                <div class="empty-state-icon">
+                    <i class="bi bi-person-badge"></i>
+                </div>
+                <div class="empty-state-title">Nenhum dentista cadastrado</div>
+                <div class="empty-state-text">
+                    Cadastre os dentistas que atendem no consultório.
+                </div>
+                <a href="{{ url_for('novo_dentista') }}" class="btn btn-primary">
+                    <i class="bi bi-plus-lg"></i>
+                    Adicionar Dentista
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

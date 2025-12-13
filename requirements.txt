@@ -1,0 +1,25 @@
+# ============================================
+# Dependências do Projeto - DentalSystem
+# Projeto Integrador - Equipe de Desenvolvimento
+# ============================================
+
+# Framework Web
+Flask==3.0.0
+
+# ORM e Banco de Dados
+SQLAlchemy==2.0.36
+Flask-SQLAlchemy==3.1.1
+psycopg2-binary==2.9.9
+
+# Autenticação e Sessões
+Flask-Login==0.6.3
+
+# Formulários e Proteção CSRF
+Flask-WTF==1.2.1
+WTForms==3.1.1
+
+# Variaveis de Ambiente
+python-dotenv==1.0.0
+
+# Servidor de Producao
+gunicorn==21.2.0

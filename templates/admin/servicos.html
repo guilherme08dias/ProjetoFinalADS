@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{# ============================================
+CRUD Serviços - DentalSystem
+Projeto Integrador - Equipe de Desenvolvimento
+============================================ #}
+
+{% block title %}Serviços - DentalSystem{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <!-- Cabeçalho da Página -->
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">Serviços</h1>
+            <p class="page-subtitle">Gerencie os serviços oferecidos pelo consultório</p>
+        </div>
+        <div class="page-actions">
+            <a href="{{ url_for('novo_servico') }}" class="btn btn-primary">
+                <i class="bi bi-plus-lg"></i>
+                Novo Serviço
+            </a>
+        </div>
+    </div>
+
+    <!-- Lista de Serviços -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Lista de Serviços</h3>
+            <span class="badge badge-secondary">{{ servicos|length }} serviço(s)</span>
+        </div>
+
+        {% if servicos %}
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Duração</th>
+                        <th>Preço</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for servico in servicos %}
+                    <tr>
+                        <td>
+                            <div style="font-weight: 500;">{{ servico.nome }}</div>
+                            <div style="font-size: 13px; color: var(--color-gray-400);">{{ servico.descricao[:50] if
+                                servico.descricao else '-' }}{% if servico.descricao and servico.descricao|length > 50
+                                %}...{% endif %}</div>
+                        </td>
+                        <td>{{ servico.duracao_minutos }} min</td>
+                        <td style="font-weight: 500;">R$ {{ "%.2f"|format(servico.preco) }}</td>
+                        <td>
+                            {% if servico.ativo %}
+                            <span class="badge badge-success">Ativo</span>
+                            {% else %}
+                            <span class="badge badge-secondary">Inativo</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div style="display: flex; gap: 8px;">
+                                <a href="{{ url_for('editar_servico', id=servico.id) }}"
+                                    class="btn btn-secondary btn-sm" title="Editar">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <form method="POST" action="{{ url_for('excluir_servico', id=servico.id) }}"
+                                    onsubmit="return confirm('Tem certeza que deseja excluir este serviço?')">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <button type="submit" class="btn btn-danger btn-sm" title="Excluir">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="card-body">
+            <div class="empty-state">
+                <div class="empty-state-icon">
+                    <i class="bi bi-clipboard2-pulse"></i>
+                </div>
+                <div class="empty-state-title">Nenhum serviço cadastrado</div>
+                <div class="empty-state-text">
+                    Cadastre os serviços oferecidos pelo consultório.
+                </div>
+                <a href="{{ url_for('novo_servico') }}" class="btn btn-primary">
+                    <i class="bi bi-plus-lg"></i>
+                    Adicionar Serviço
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

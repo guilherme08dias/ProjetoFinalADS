@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{# ============================================
+Dashboard do Paciente - DentalSystem
+Projeto Integrador - Equipe de Desenvolvimento
+============================================ #}
+
+{% block title %}Dashboard - DentalSystem{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <!-- Cabeçalho da Página -->
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">Olá, {{ current_user.nome.split()[0] }}!</h1>
+            <p class="page-subtitle">Bem-vindo ao seu painel de agendamentos</p>
+        </div>
+        <div class="page-actions">
+            <a href="{{ url_for('agendar') }}" class="btn btn-primary">
+                <i class="bi bi-plus-lg"></i>
+                Novo Agendamento
+            </a>
+        </div>
+    </div>
+
+    <!-- Cards de Estatísticas -->
+    <div class="stats-grid">
+        <div class="card">
+            <div class="stat-card">
+                <div class="stat-icon primary">
+                    <i class="bi bi-calendar-check"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-value">{{ total_agendamentos }}</div>
+                    <div class="stat-label">Total de Consultas</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="stat-card">
+                <div class="stat-icon success">
+                    <i class="bi bi-check-circle"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-value">{{ agendamentos_confirmados }}</div>
+                    <div class="stat-label">Confirmadas</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="stat-card">
+                <div class="stat-icon info">
+                    <i class="bi bi-clock-history"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-value">{{ agendamentos|length }}</div>
+                    <div class="stat-label">Próximas Consultas</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Próximas Consultas -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">
+                <i class="bi bi-calendar3 me-2" style="color: var(--color-primary);"></i>
+                Próximas Consultas
+            </h3>
+            <a href="{{ url_for('meus_agendamentos') }}" class="btn btn-secondary btn-sm">
+                Ver todas
+            </a>
+        </div>
+        <div class="card-body" style="padding: 0;">
+            {% if agendamentos %}
+            {% for apt in agendamentos %}
+            <div class="appointment-item">
+                <div class="appointment-time">
+                    <div class="appointment-time-value">{{ apt.data_hora_inicio.strftime('%H:%M') }}</div>
+                    <div class="appointment-time-date">{{ apt.data_hora_inicio.strftime('%d/%m') }}</div>
+                </div>
+                <div class="appointment-info">
+                    <div class="appointment-patient">{{ apt.servico.nome }}</div>
+                    <div class="appointment-service">
+                        <i class="bi bi-person-badge"></i> {{ apt.dentista.nome }}
+                    </div>
+                </div>
+                <span class="badge badge-{{ apt.get_status_badge() }}">
+                    {{ apt.status|capitalize }}
+                </span>
+            </div>
+            {% endfor %}
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon">
+                    <i class="bi bi-calendar-x"></i>
+                </div>
+                <div class="empty-state-title">Nenhuma consulta agendada</div>
+                <div class="empty-state-text">
+                    Você ainda não possui consultas agendadas. Que tal marcar uma?
+                </div>
+                <a href="{{ url_for('agendar') }}" class="btn btn-primary">
+                    <i class="bi bi-plus-lg"></i>
+                    Agendar Consulta
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
